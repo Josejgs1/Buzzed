@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  avatarUrl String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  reviews   Review[]
+  badges    UserBadge[]
+}
+
+model Establishment {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String
+  phone       String?
+  description String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  drinks      Drink[]
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  iconUrl     String?
+  drinks      Drink[]
+}
+
+model Ingredient {
+  id     Int               @id @default(autoincrement())
+  name   String            @unique
+  drinks DrinkIngredient[]
+}
+
+model Drink {
+  id              Int               @id @default(autoincrement())
+  name            String
+  description     String?
+  imageUrl        String?
+  abv             Float             @default(0)
+  sweetness       Int               @default(3) // 1-5
+  bitterness      Int               @default(3) // 1-5
+  citrus          Int               @default(3) // 1-5
+  strength        Int               @default(3) // 1-5
+  categoryId      Int
+  establishmentId Int
+  createdAt       DateTime          @default(now())
+  category        Category          @relation(fields: [categoryId], references: [id])
+  establishment   Establishment     @relation(fields: [establishmentId], references: [id])
+  ingredients     DrinkIngredient[]
+  reviews         Review[]
+
+  @@index([categoryId])
+  @@index([establishmentId])
+}
+
+model DrinkIngredient {
+  id           Int        @id @default(autoincrement())
+  drinkId      Int
+  ingredientId Int
+  drink        Drink      @relation(fields: [drinkId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@unique([drinkId, ingredientId])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  rating     Int // 1-5
+  comment    String?
+  sweetness  Int?     // 1-5 user-perceived
+  bitterness Int?     // 1-5
+  citrus     Int?     // 1-5
+  strength   Int?     // 1-5
+  userId     Int
+  drinkId    Int
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  drink      Drink    @relation(fields: [drinkId], references: [id])
+
+  @@index([userId])
+  @@index([drinkId])
+}
+
+model Badge {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String
+  iconUrl     String?
+  criteria    String // JSON string describing unlock criteria
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  badgeId    Int
+  unlockedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  badge      Badge    @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+}
