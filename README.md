@@ -70,6 +70,49 @@ npx expo start -c
    - **Android:** Toque em "Scan QR Code" na tela inicial do app e aponte para o terminal.
    - **iOS:** Abra a Câmera nativa do iPhone, escaneie o QR Code e toque para abrir no Expo Go.
 
+## 🌐 Deploy Atual
+
+Este projeto está separado em dois serviços:
+
+- **Frontend (Vercel):** `https://buzzed-sage.vercel.app`
+- **Backend (Render):** `https://buzzed-5umx.onrender.com`
+
+### Vercel
+
+No projeto do frontend na Vercel, configure:
+
+```env
+EXPO_PUBLIC_API_URL=https://buzzed-5umx.onrender.com
+```
+
+Use estes comandos:
+
+```text
+Root Directory: frontend
+Build Command: npx expo export --platform web --output-dir dist
+Output Directory: dist
+```
+
+### Render
+
+No serviço do backend no Render, configure:
+
+```env
+DATABASE_URL=postgresql://...
+JWT_SECRET=uma-chave-segura
+NODE_VERSION=20
+```
+
+Use estes comandos:
+
+```text
+Root Directory: backend
+Build Command: npm install && npx prisma generate && npx prisma migrate deploy
+Start Command: node src/server.js
+```
+
+Depois do primeiro deploy com banco vazio, rode `npm run seed` uma vez no Shell do Render para criar os usuários de teste.
+
 ### 🔑 Usuários para Teste
 
 Ao rodar o `npm run seed`, o banco já é populado com três contas prontas para uso. Você pode fazer login no app usando:
