@@ -203,6 +203,25 @@ async function main() {
   console.log(`✅ Created ${ingredientNames.length} ingredients`);
 
   // ─── Drinks ───
+  const drinkImages = {
+    "Negroni": "negroni.jpg",
+    "Old Fashioned": "old-fashioned.jpg",
+    "Caipirinha Clássica": "caipirinha-classica.jpg",
+    "Moscow Mule": "moscow-mule.jpg",
+    "Whisky Sour": "whisky-sour.jpg",
+    "Tropical Sunset": "tropical-sunset.jpg",
+    "Gin Tônica Rooftop": "gin-tonica.jpg",
+    "Piña Colada": "pina-colada.jpg",
+    "Aperol Spritz": "aperol-spritz.jpg",
+    "Berry Bliss Mocktail": "berry-mocktail.jpg",
+    "Mojito": "mojito.jpg",
+    "Margarita": "margarita.jpg",
+    "Caipirinha de Maracujá": "caipirinha-maracuja.jpg",
+    "Gin Fizz com Mel": "gin-fizz-mel.jpg",
+    "Cuba Libre": "cuba-libre.jpg",
+    "Sunset Mocktail": "sunset-mocktail.jpg",
+  };
+
   const drinksData = [
     // Bar do Zé
     {
@@ -476,6 +495,7 @@ async function main() {
 
   for (const drinkData of drinksData) {
     const { ingredients: ingredientList, ...data } = drinkData;
+    data.imageUrl = drinkImages[data.name] ? `/public/drinks/${drinkImages[data.name]}` : null;
     const drink = await prisma.drink.create({ data });
 
     for (const ingredientName of ingredientList) {

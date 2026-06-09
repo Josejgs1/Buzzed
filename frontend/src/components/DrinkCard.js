@@ -1,13 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import StarRating from "./StarRating";
 
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - SPACING.base * 3) / 2;
-
-export default function DrinkCard({ drink, onPress, compact = false }) {
+export default function DrinkCard({ drink, onPress, compact = false, compactWidth }) {
   const categoryEmojis = {
     Clássicos: "🥃",
     Tropicais: "🌴",
@@ -21,15 +18,23 @@ export default function DrinkCard({ drink, onPress, compact = false }) {
 
   return (
     <TouchableOpacity
-      style={[styles.card, compact && styles.cardCompact]}
+      style={[styles.card, compact && [styles.cardCompact, compactWidth && { width: compactWidth }]]}
       onPress={onPress}
       activeOpacity={0.8}
     >
       {/* Visual placeholder with gradient */}
       <View style={styles.imageContainer}>
-        <View style={styles.gradientBg}>
-          <Text style={styles.drinkEmoji}>{emoji}</Text>
-        </View>
+        {drink.imageUrl ? (
+          <Image
+            source={{ uri: `http://192.168.18.223:3333${drink.imageUrl}` }}
+            style={styles.drinkImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.gradientBg}>
+            <Text style={styles.drinkEmoji}>{emoji}</Text>
+          </View>
+        )}
         {drink.abv > 0 && (
           <View style={styles.abvBadge}>
             <Text style={styles.abvText}>{drink.abv}%</Text>
@@ -94,20 +99,18 @@ export default function DrinkCard({ drink, onPress, compact = false }) {
 
 const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.lg,
     overflow: "hidden",
-    marginBottom: SPACING.base,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   cardCompact: {
-    width: CARD_WIDTH * 0.9,
-    marginRight: SPACING.md,
+    width: 140,
+    marginRight: SPACING.base,
   },
   imageContainer: {
-    height: 120,
+    aspectRatio: 1,
     position: "relative",
   },
   gradientBg: {
@@ -115,6 +118,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
+  },
+  drinkImage: {
+    width: "100%",
+    height: "100%",
   },
   drinkEmoji: {
     fontSize: 48,

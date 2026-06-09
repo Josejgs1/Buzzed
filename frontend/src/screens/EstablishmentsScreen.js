@@ -60,7 +60,10 @@ export default function EstablishmentsScreen({ navigation }) {
         }
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.title}>📍 Estabelecimentos</Text>
+            <View style={styles.titleRow}>
+              <Ionicons name="location" size={28} color={COLORS.primary} />
+              <Text style={styles.title}>Estabelecimentos</Text>
+            </View>
             <Text style={styles.subtitle}>
               Explore bares e restaurantes parceiros
             </Text>
@@ -76,8 +79,8 @@ export default function EstablishmentsScreen({ navigation }) {
             }
             activeOpacity={0.8}
           >
-            <View style={styles.cardIcon}>
-              <Ionicons name="wine" size={32} color={COLORS.primary} />
+            <View style={styles.cardAvatar}>
+              <Ionicons name="storefront" size={24} color={COLORS.primary} />
             </View>
             <View style={styles.cardContent}>
               <Text style={styles.cardName}>{item.name}</Text>
@@ -91,11 +94,6 @@ export default function EstablishmentsScreen({ navigation }) {
                   {item.address}
                 </Text>
               </View>
-              {item.description && (
-                <Text style={styles.cardDescription} numberOfLines={2}>
-                  {item.description}
-                </Text>
-              )}
               <View style={styles.cardFooter}>
                 <View style={styles.drinkCount}>
                   <Ionicons
@@ -146,6 +144,11 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 4,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+  },
   subtitle: {
     fontSize: FONTS.sizes.md,
     color: COLORS.textSecondary,
@@ -154,20 +157,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.lg,
-    overflow: "hidden",
+    padding: SPACING.base,
     marginBottom: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    alignItems: "center",
   },
-  cardIcon: {
-    width: 80,
+  cardAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: COLORS.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: SPACING.md,
   },
   cardContent: {
     flex: 1,
-    padding: SPACING.base,
   },
   cardName: {
     fontSize: FONTS.sizes.lg,

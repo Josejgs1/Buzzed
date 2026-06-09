@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SimpleGrid } from "react-native-super-grid";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
-import StarRating from "../components/StarRating";
+import DrinkCard from "../components/DrinkCard";
 import api from "../services/api";
 
 export default function HistoryScreen({ navigation }) {
@@ -40,6 +41,20 @@ export default function HistoryScreen({ navigation }) {
     return unsubscribe;
   }, [navigation, loadReviews]);
 
+  const sections = useMemo(() => {
+    const grouped = {};
+    reviews.forEach((review) => {
+      const date = new Date(review.createdAt).toLocaleDateString("pt-BR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(review);
+    });
+    return Object.entries(grouped).map(([date, items]) => ({ date, items }));
+  }, [reviews]);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -48,20 +63,9 @@ export default function HistoryScreen({ navigation }) {
     );
   }
 
-  const categoryEmojis = {
-    Clássicos: "🥃",
-    Tropicais: "🌴",
-    "Gin-Based": "🫒",
-    "Rum & Cachaça": "🍹",
-    "Whisky & Bourbon": "🥃",
-    "Sem Álcool": "🍹",
-  };
-
   return (
     <View style={styles.container}>
-      <FlatList
-        data={reviews}
-        keyExtractor={(item) => item.id.toString()}
+      <ScrollView
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -74,73 +78,48 @@ export default function HistoryScreen({ navigation }) {
             colors={[COLORS.primary]}
           />
         }
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={styles.title}>📖 Meu Histórico</Text>
-            <Text style={styles.subtitle}>
-              {reviews.length} drink{reviews.length !== 1 ? "s" : ""} avaliado
-              {reviews.length !== 1 ? "s" : ""}
-            </Text>
+      >
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <Ionicons name="book" size={28} color={COLORS.primary} />
+            <Text style={styles.title}>Meu Histórico</Text>
           </View>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardLeft}>
-              <Text style={styles.drinkEmoji}>
-                {categoryEmojis[item.drink?.category?.name] || "🍸"}
-              </Text>
+          <Text style={styles.subtitle}>
+            {reviews.length} drink{reviews.length !== 1 ? "s" : ""} avaliado
+            {reviews.length !== 1 ? "s" : ""}
+          </Text>
+        </View>
+
+        {sections.length > 0 ? (
+          sections.map((section) => (
+            <View key={section.date}>
+              <Text style={styles.dateHeader}>{section.date}</Text>
+              <SimpleGrid
+                itemDimension={140}
+                maxItemsPerRow={3}
+                data={section.items}
+                spacing={SPACING.base}
+                renderItem={({ item }) => (
+                  <DrinkCard
+                    drink={item.drink}
+                    onPress={() =>
+                      navigation.navigate("DrinkDetail", { drinkId: item.drink?.id })
+                    }
+                  />
+                )}
+              />
             </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.drinkName}>{item.drink?.name}</Text>
-              <View style={styles.cardMeta}>
-                <Ionicons
-                  name="location-outline"
-                  size={12}
-                  color={COLORS.textMuted}
-                />
-                <Text style={styles.establishment}>
-                  {item.drink?.establishment?.name}
-                </Text>
-              </View>
-              <View style={styles.ratingRow}>
-                <StarRating rating={item.rating} size={14} />
-                <Text style={styles.date}>
-                  {new Date(item.createdAt).toLocaleDateString("pt-BR")}
-                </Text>
-              </View>
-              {item.comment && (
-                <Text style={styles.comment} numberOfLines={2}>
-                  "{item.comment}"
-                </Text>
-              )}
-              {/* Mini sensory */}
-              <View style={styles.sensoryRow}>
-                {item.sweetness && (
-                  <Text style={styles.sensoryItem}>🍯 {item.sweetness}</Text>
-                )}
-                {item.bitterness && (
-                  <Text style={styles.sensoryItem}>🫒 {item.bitterness}</Text>
-                )}
-                {item.citrus && (
-                  <Text style={styles.sensoryItem}>🍋 {item.citrus}</Text>
-                )}
-                {item.strength && (
-                  <Text style={styles.sensoryItem}>🔥 {item.strength}</Text>
-                )}
-              </View>
-            </View>
-          </View>
-        )}
-        ListEmptyComponent={
+          ))
+        ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>📝</Text>
+            <Ionicons name="document-text-outline" size={56} color={COLORS.textMuted} />
             <Text style={styles.emptyTitle}>Nenhuma avaliação ainda</Text>
             <Text style={styles.emptyText}>
               Comece a explorar drinks e registre suas experiências!
             </Text>
           </View>
-        }
-      />
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -170,84 +149,32 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     marginBottom: 4,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+  },
   subtitle: {
     fontSize: FONTS.sizes.md,
     color: COLORS.textSecondary,
   },
-  card: {
-    flexDirection: "row",
-    backgroundColor: COLORS.card,
-    borderRadius: RADIUS.lg,
-    overflow: "hidden",
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  cardLeft: {
-    width: 60,
-    backgroundColor: COLORS.backgroundLight,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  drinkEmoji: {
-    fontSize: 28,
-  },
-  cardContent: {
-    flex: 1,
-    padding: SPACING.md,
-  },
-  drinkName: {
+  dateHeader: {
     fontSize: FONTS.sizes.base,
     fontWeight: FONTS.weights.bold,
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  cardMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginBottom: 6,
-  },
-  establishment: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.xs,
-  },
-  ratingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 6,
-  },
-  date: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.xs,
-  },
-  comment: {
     color: COLORS.textSecondary,
-    fontSize: FONTS.sizes.sm,
-    fontStyle: "italic",
-    marginBottom: 6,
-  },
-  sensoryRow: {
-    flexDirection: "row",
-    gap: SPACING.md,
-  },
-  sensoryItem: {
-    color: COLORS.textMuted,
-    fontSize: FONTS.sizes.xs,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.md,
+    textTransform: "capitalize",
   },
   emptyContainer: {
     alignItems: "center",
     paddingVertical: SPACING.xxxl,
   },
-  emptyEmoji: {
-    fontSize: 56,
-    marginBottom: SPACING.md,
-  },
   emptyTitle: {
     color: COLORS.text,
     fontSize: FONTS.sizes.lg,
     fontWeight: FONTS.weights.bold,
+    marginTop: SPACING.md,
     marginBottom: SPACING.sm,
   },
   emptyText: {

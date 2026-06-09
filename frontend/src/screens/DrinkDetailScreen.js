@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import { useAuth } from "../contexts/AuthContext";
 import SensoryBar from "../components/SensoryBar";
@@ -22,6 +24,7 @@ export default function DrinkDetailScreen({ route, navigation }) {
   const [drink, setDrink] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [activeTab, setActiveTab] = useState("sobre");
 
   // Review form state
   const [rating, setRating] = useState(0);
@@ -116,41 +119,59 @@ export default function DrinkDetailScreen({ route, navigation }) {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Hero */}
       <View style={styles.hero}>
-        <View style={styles.heroGradient}>
-          <Text style={styles.heroEmoji}>
-            {categoryEmojis[drink.category?.name] || "🍸"}
-          </Text>
-        </View>
+        {drink.imageUrl ? (
+          <Image
+            source={{ uri: `http://192.168.18.223:3333${drink.imageUrl}` }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.heroGradient}>
+            <Text style={styles.heroEmoji}>
+              {categoryEmojis[drink.category?.name] || "🍸"}
+            </Text>
+          </View>
+        )}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color={COLORS.text} />
         </TouchableOpacity>
-        <View style={styles.abvBadge}>
-          <Text style={styles.abvText}>
-            {drink.abv > 0 ? `${drink.abv}% ABV` : "Sem álcool"}
-          </Text>
-        </View>
+        {/* Overlay */}
+        <LinearGradient
+          colors={["transparent", "rgba(0,0,0,0.8)"]}
+          style={styles.heroOverlay}
+        >
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>{drink.name}</Text>
+            <View style={styles.abvBadge}>
+              <Text style={styles.abvText}>
+                {drink.abv > 0 ? `${drink.abv}%` : "0%"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.metaRow}>
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{drink.category?.name}</Text>
+            </View>
+            {drink.avgRating !== null && (
+              <View style={styles.ratingContainer}>
+                <StarRating rating={drink.avgRating} size={18} showValue />
+                <Text style={styles.reviewCount}>
+                  ({drink.reviewCount} avaliações)
+                </Text>
+              </View>
+            )}
+          </View>
+        </LinearGradient>
       </View>
 
       <View style={styles.content}>
-        {/* Title */}
-        <Text style={styles.name}>{drink.name}</Text>
-
-        <View style={styles.metaRow}>
-          <View style={styles.categoryBadge}>
-            <Text style={styles.categoryText}>{drink.category?.name}</Text>
-          </View>
-          {drink.avgRating !== null && (
-            <View style={styles.ratingContainer}>
-              <StarRating rating={drink.avgRating} size={18} showValue />
-              <Text style={styles.reviewCount}>
-                ({drink.reviewCount} avaliações)
-              </Text>
-            </View>
-          )}
-        </View>
+        {/* Description */}
+        {drink.description && (
+          <Text style={styles.description}>{drink.description}</Text>
+        )}
 
         {/* Establishment */}
         <TouchableOpacity
@@ -173,17 +194,30 @@ export default function DrinkDetailScreen({ route, navigation }) {
           <Ionicons name="chevron-forward" size={20} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        {/* Description */}
-        {drink.description && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📝 Descrição</Text>
-            <Text style={styles.description}>{drink.description}</Text>
-          </View>
-        )}
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "sobre" && styles.tabActive]}
+            onPress={() => setActiveTab("sobre")}
+          >
+            <Text style={[styles.tabText, activeTab === "sobre" && styles.tabTextActive]}>Sobre</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === "avaliacoes" && styles.tabActive]}
+            onPress={() => setActiveTab("avaliacoes")}
+          >
+            <Text style={[styles.tabText, activeTab === "avaliacoes" && styles.tabTextActive]}>Avaliações</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* Ingredients */}
+        {activeTab === "sobre" && (
+          <>
+            {/* Ingredients */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🧪 Ingredientes</Text>
+                    <View style={styles.sectionTitleRow}>
+            <Ionicons name="flask" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Ingredientes</Text>
+          </View>
           <View style={styles.ingredientsList}>
             {drink.ingredients?.map((ing) => (
               <View key={ing.id} style={styles.ingredientChip}>
@@ -195,7 +229,10 @@ export default function DrinkDetailScreen({ route, navigation }) {
 
         {/* Sensory Profile */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>👅 Perfil Sensorial</Text>
+                    <View style={styles.sectionTitleRow}>
+            <Ionicons name="nutrition" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Perfil Sensorial</Text>
+          </View>
           <View style={styles.sensoryCard}>
             <SensoryBar type="sweetness" value={drink.sweetness} />
             <SensoryBar type="bitterness" value={drink.bitterness} />
@@ -207,9 +244,10 @@ export default function DrinkDetailScreen({ route, navigation }) {
         {/* Average user sensory (if reviews exist) */}
         {drink.avgSensory?.sweetness && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              👥 Percepção dos usuários
-            </Text>
+            <View style={styles.sectionTitleRow}>
+              <Ionicons name="people" size={20} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Percepção dos usuários</Text>
+            </View>
             <View style={styles.sensoryCard}>
               <SensoryBar
                 type="sweetness"
@@ -234,8 +272,12 @@ export default function DrinkDetailScreen({ route, navigation }) {
             </View>
           </View>
         )}
+          </>
+        )}
 
-        {/* Review button */}
+        {activeTab === "avaliacoes" && (
+          <>
+            {/* Review button */}
         {signed && !showReviewForm && (
           <TouchableOpacity
             style={styles.reviewButton}
@@ -249,7 +291,10 @@ export default function DrinkDetailScreen({ route, navigation }) {
         {/* Review Form */}
         {showReviewForm && (
           <View style={styles.reviewForm}>
-            <Text style={styles.sectionTitle}>✍️ Sua avaliação</Text>
+                        <View style={styles.sectionTitleRow}>
+              <Ionicons name="create" size={20} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Sua avaliação</Text>
+            </View>
 
             {/* Star selector */}
             <Text style={styles.formLabel}>Nota geral</Text>
@@ -364,9 +409,12 @@ export default function DrinkDetailScreen({ route, navigation }) {
 
         {/* Reviews list */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            💬 Avaliações ({drink.reviews?.length || 0})
-          </Text>
+          <View style={styles.sectionTitleRow}>
+            <Ionicons name="chatbubbles" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>
+              Avaliações ({drink.reviews?.length || 0})
+            </Text>
+          </View>
           {drink.reviews?.length > 0 ? (
             drink.reviews.map((review) => (
               <View key={review.id} style={styles.reviewCard}>
@@ -425,6 +473,8 @@ export default function DrinkDetailScreen({ route, navigation }) {
             </View>
           )}
         </View>
+          </>
+        )}
       </View>
     </ScrollView>
   );
@@ -442,7 +492,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   hero: {
-    height: 200,
+    height: 260,
     position: "relative",
   },
   heroGradient: {
@@ -450,6 +500,18 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
+  },
+  heroImage: {
+    width: "100%",
+    height: "100%",
+  },
+  heroOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: SPACING.base,
+    paddingTop: SPACING.xl,
   },
   heroEmoji: {
     fontSize: 80,
@@ -462,10 +524,13 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     padding: SPACING.sm,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: SPACING.sm,
+  },
   abvBadge: {
-    position: "absolute",
-    bottom: SPACING.base,
-    right: SPACING.base,
     backgroundColor: COLORS.accent,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
@@ -484,14 +549,12 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.xxl,
     fontWeight: FONTS.weights.black,
     color: COLORS.text,
-    marginBottom: SPACING.sm,
+    flex: 1,
   },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
     gap: SPACING.md,
-    marginBottom: SPACING.lg,
   },
   categoryBadge: {
     backgroundColor: COLORS.primary + "22",
@@ -539,19 +602,49 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.sm,
     marginTop: 2,
   },
+  tabs: {
+    flexDirection: "row",
+    marginBottom: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    alignItems: "center",
+  },
+  tabActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.primary,
+  },
+  tabText: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.sizes.base,
+    fontWeight: FONTS.weights.medium,
+  },
+  tabTextActive: {
+    color: COLORS.primary,
+    fontWeight: FONTS.weights.bold,
+  },
   section: {
     marginBottom: SPACING.xl,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   sectionTitle: {
     fontSize: FONTS.sizes.lg,
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
-    marginBottom: SPACING.md,
   },
   description: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.base,
     lineHeight: 24,
+    marginBottom: SPACING.lg,
   },
   ingredientsList: {
     flexDirection: "row",
