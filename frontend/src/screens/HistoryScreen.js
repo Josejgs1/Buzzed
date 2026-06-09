@@ -76,7 +76,10 @@ export default function HistoryScreen({ navigation }) {
         }
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.title}>📖 Meu Histórico</Text>
+            <View style={styles.titleRow}>
+              <Ionicons name="time" size={28} color={COLORS.primary} />
+              <Text style={styles.title}>Meu Histórico</Text>
+            </View>
             <Text style={styles.subtitle}>
               {reviews.length} drink{reviews.length !== 1 ? "s" : ""} avaliado
               {reviews.length !== 1 ? "s" : ""}
@@ -169,6 +172,11 @@ const styles = StyleSheet.create({
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
     marginBottom: 4,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
   },
   subtitle: {
     fontSize: FONTS.sizes.md,

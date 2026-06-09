@@ -60,7 +60,10 @@ export default function EstablishmentsScreen({ navigation }) {
         }
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.title}>📍 Estabelecimentos</Text>
+            <View style={styles.titleRow}>
+              <Ionicons name="location" size={28} color={COLORS.primary} />
+              <Text style={styles.title}>Estabelecimentos</Text>
+            </View>
             <Text style={styles.subtitle}>
               Explore bares e restaurantes parceiros
             </Text>
@@ -145,6 +148,11 @@ const styles = StyleSheet.create({
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
     marginBottom: 4,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
   },
   subtitle: {
     fontSize: FONTS.sizes.md,
