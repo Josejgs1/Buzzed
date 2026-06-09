@@ -59,7 +59,7 @@ export default function EstablishmentDetailScreen({ route, navigation }) {
             {/* Establishment info */}
             <View style={styles.infoCard}>
               <View style={styles.iconContainer}>
-                <Ionicons name="wine" size={48} color={COLORS.primary} />
+                <Ionicons name="storefront" size={48} color={COLORS.primary} />
               </View>
               <Text style={styles.name}>{establishment.name}</Text>
               <View style={styles.statsRow}>
