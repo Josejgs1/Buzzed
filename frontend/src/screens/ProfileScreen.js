@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,11 +50,8 @@ export default function ProfileScreen({ navigation }) {
     return unsubscribe;
   }, [navigation, loadData]);
 
-  function handleSignOut() {
-    Alert.alert("Sair", "Deseja realmente sair?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Sair", style: "destructive", onPress: signOut },
-    ]);
+  async function handleSignOut() {
+    await signOut();
   }
 
   if (loading) {

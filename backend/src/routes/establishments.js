@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
   try {
     const establishments = await prisma.establishment.findMany({
       include: {
-        _count: { select: { drinks: true } },
+        _count: { select: { drinks: { where: { isActive: true } } } },
       },
       orderBy: { name: "asc" },
     });
@@ -28,6 +28,7 @@ router.get("/:id", async (req, res) => {
       where: { id: parseInt(req.params.id) },
       include: {
         drinks: {
+          where: { isActive: true },
           include: {
             category: true,
             ingredients: { include: { ingredient: true } },

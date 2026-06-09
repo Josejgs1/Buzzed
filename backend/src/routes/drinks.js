@@ -1,6 +1,5 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-const { authMiddleware } = require("../middleware/auth");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -10,7 +9,7 @@ router.get("/", async (req, res) => {
   try {
     const { categoryId, establishmentId, search, minSweet, maxSweet, minBitter, maxBitter, minCitrus, maxCitrus, minStrength, maxStrength } = req.query;
 
-    const where = {};
+    const where = { isActive: true };
 
     if (categoryId) where.categoryId = parseInt(categoryId);
     if (establishmentId) where.establishmentId = parseInt(establishmentId);
@@ -79,8 +78,8 @@ router.get("/", async (req, res) => {
 // GET /drinks/:id — Get drink details
 router.get("/:id", async (req, res) => {
   try {
-    const drink = await prisma.drink.findUnique({
-      where: { id: parseInt(req.params.id) },
+    const drink = await prisma.drink.findFirst({
+      where: { id: parseInt(req.params.id), isActive: true },
       include: {
         category: true,
         establishment: true,

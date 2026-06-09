@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
   try {
     const categories = await prisma.category.findMany({
       include: {
-        _count: { select: { drinks: true } },
+        _count: { select: { drinks: { where: { isActive: true } } } },
       },
       orderBy: { name: "asc" },
     });

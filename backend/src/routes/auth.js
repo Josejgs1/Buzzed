@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
-const { authMiddleware, JWT_SECRET } = require("../middleware/auth");
+const { authMiddleware, JWT_SECRET, ROLES } = require("../middleware/auth");
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -23,13 +23,13 @@ router.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: { name, email, password: hashedPassword, role: ROLES.CUSTOMER },
     });
 
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
 
     return res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
       token,
     });
   } catch (error) {
@@ -60,7 +60,13 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
 
     return res.json({
-      user: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
+      },
       token,
     });
   } catch (error) {
@@ -78,8 +84,12 @@ router.get("/profile", authMiddleware, async (req, res) => {
         id: true,
         name: true,
         email: true,
+        role: true,
         avatarUrl: true,
         createdAt: true,
+        establishment: {
+          select: { id: true, name: true },
+        },
         _count: { select: { reviews: true, badges: true } },
       },
     });

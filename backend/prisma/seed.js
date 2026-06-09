@@ -26,6 +26,7 @@ async function main() {
         name: "Maria Silva",
         email: "maria@buzzed.com",
         password: passwordHash,
+        role: "CUSTOMER",
       },
     }),
     prisma.user.create({
@@ -33,6 +34,7 @@ async function main() {
         name: "João Santos",
         email: "joao@buzzed.com",
         password: passwordHash,
+        role: "CUSTOMER",
       },
     }),
     prisma.user.create({
@@ -40,10 +42,39 @@ async function main() {
         name: "Ana Costa",
         email: "ana@buzzed.com",
         password: passwordHash,
+        role: "CUSTOMER",
       },
     }),
   ]);
   console.log(`✅ Created ${users.length} users`);
+
+  const owners = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: "Zé Oliveira",
+        email: "bar@buzzed.com",
+        password: passwordHash,
+        role: "RESTAURANT_OWNER",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: "Carla Mendes",
+        email: "rooftop@buzzed.com",
+        password: passwordHash,
+        role: "RESTAURANT_OWNER",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: "Pedro Lima",
+        email: "boteco@buzzed.com",
+        password: passwordHash,
+        role: "RESTAURANT_OWNER",
+      },
+    }),
+  ]);
+  console.log(`✅ Created ${owners.length} restaurant owners`);
 
   // ─── Establishments ───
   const establishments = await Promise.all([
@@ -55,6 +86,7 @@ async function main() {
         description:
           "Bar clássico paulistano com drinks autorais e ambiente descontraído. Referência em coquetelaria artesanal desde 2015.",
         imageUrl: null,
+        ownerId: owners[0].id,
       },
     }),
     prisma.establishment.create({
@@ -65,6 +97,7 @@ async function main() {
         description:
           "Rooftop com vista panorâmica da cidade. Especialidade em drinks tropicais e experiências sensoriais premium.",
         imageUrl: null,
+        ownerId: owners[1].id,
       },
     }),
     prisma.establishment.create({
@@ -75,6 +108,7 @@ async function main() {
         description:
           "O melhor da coquetelaria brasileira com toques contemporâneos. Caipirinha artesanal é a especialidade da casa.",
         imageUrl: null,
+        ownerId: owners[2].id,
       },
     }),
   ]);

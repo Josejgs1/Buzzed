@@ -8,6 +8,7 @@ const establishmentsRoutes = require("./routes/establishments");
 const reviewsRoutes = require("./routes/reviews");
 const badgesRoutes = require("./routes/badges");
 const categoriesRoutes = require("./routes/categories");
+const restaurantRoutes = require("./routes/restaurant");
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -24,6 +25,7 @@ app.use("/establishments", establishmentsRoutes);
 app.use("/reviews", reviewsRoutes);
 app.use("/badges", badgesRoutes);
 app.use("/categories", categoriesRoutes);
+app.use("/restaurant", restaurantRoutes);
 
 // Health check
 app.get("/", (req, res) => {
@@ -40,6 +42,13 @@ app.get("/", (req, res) => {
       "GET  /establishments",
       "GET  /establishments/:id",
       "GET  /categories",
+      "POST /restaurant/register",
+      "GET  /restaurant/dashboard",
+      "GET  /restaurant/drinks",
+      "POST /restaurant/drinks",
+      "PUT  /restaurant/drinks/:id",
+      "DELETE /restaurant/drinks/:id",
+      "GET  /restaurant/reviews",
       "POST /reviews",
       "GET  /reviews/mine",
       "GET  /badges",
