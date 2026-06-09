@@ -6,7 +6,7 @@ const LOCAL_API_URL = "http://localhost:3333";
 const MOBILE_API_URL = "http://192.168.18.10:3333";
 const PRODUCTION_API_URL = "https://buzzed-5umx.onrender.com";
 
-const API_URL =
+export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
   (Platform.OS === "web"
     ? __DEV__

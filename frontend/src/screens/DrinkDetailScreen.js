@@ -16,7 +16,7 @@ import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import { useAuth } from "../contexts/AuthContext";
 import SensoryBar from "../components/SensoryBar";
 import StarRating from "../components/StarRating";
-import api from "../services/api";
+import api, { API_URL } from "../services/api";
 
 export default function DrinkDetailScreen({ route, navigation }) {
   const { drinkId } = route.params;
@@ -121,7 +121,7 @@ export default function DrinkDetailScreen({ route, navigation }) {
       <View style={styles.hero}>
         {drink.imageUrl ? (
           <Image
-            source={{ uri: `http://192.168.18.223:3333${drink.imageUrl}` }}
+            source={{ uri: `${API_URL}${drink.imageUrl}` }}
             style={styles.heroImage}
             resizeMode="cover"
           />

@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import StarRating from "./StarRating";
+import { API_URL } from "../services/api";
 
 export default function DrinkCard({ drink, onPress, compact = false, compactWidth }) {
   const categoryEmojis = {
@@ -26,7 +27,7 @@ export default function DrinkCard({ drink, onPress, compact = false, compactWidt
       <View style={styles.imageContainer}>
         {drink.imageUrl ? (
           <Image
-            source={{ uri: `http://192.168.18.223:3333${drink.imageUrl}` }}
+            source={{ uri: `${API_URL}${drink.imageUrl}` }}
             style={styles.drinkImage}
             resizeMode="cover"
           />
