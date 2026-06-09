@@ -81,7 +81,7 @@ export default function HistoryScreen({ navigation }) {
       >
         <View style={styles.header}>
           <View style={styles.titleRow}>
-            <Ionicons name="time" size={28} color={COLORS.primary} />
+            <Ionicons name="book" size={28} color={COLORS.primary} />
             <Text style={styles.title}>Meu Histórico</Text>
           </View>
           <Text style={styles.subtitle}>
