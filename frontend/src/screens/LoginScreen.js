@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -41,7 +42,7 @@ export default function LoginScreen() {
     }
 
     if (isRestaurant && (!establishmentName || !address)) {
-      Alert.alert("Erro", "Preencha nome e endereço do restaurante");
+      Alert.alert("Erro", "Preencha nome e endereço do empreendimento");
       return;
     }
 
@@ -86,7 +87,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.logoArea}>
-          <Text style={styles.logoEmoji}>🍸</Text>
+          <Ionicons name="beer" size={64} color={COLORS.primary} />
           <Text style={styles.logoText}>Buzzed</Text>
           <Text style={styles.tagline}>Drink Explorer & Feedback</Text>
         </View>
@@ -96,12 +97,12 @@ export default function LoginScreen() {
             {isLogin
               ? "Entrar"
               : isRestaurant
-                ? "Cadastrar restaurante"
+                ? "Cadastrar empreendimento"
                 : "Criar conta"}
           </Text>
           <Text style={styles.formSubtitle}>
             {isLogin
-              ? "Acesse sua conta de cliente ou restaurante"
+              ? "Acesse sua conta de cliente ou empreendimento"
               : isRestaurant
                 ? "Publique seu cardápio e acompanhe avaliações"
                 : "Explore drinks e registre suas experiências"}
@@ -151,10 +152,10 @@ export default function LoginScreen() {
           {isRestaurant && (
             <>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Restaurante</Text>
+                <Text style={styles.inputLabel}>Empreendimento</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Nome do restaurante"
+                  placeholder="Nome do empreendimento"
                   placeholderTextColor={COLORS.textMuted}
                   value={establishmentName}
                   onChangeText={setEstablishmentName}
@@ -213,7 +214,7 @@ export default function LoginScreen() {
                 {isLogin
                   ? "Entrar"
                   : isRestaurant
-                    ? "Cadastrar restaurante"
+                    ? "Cadastrar empreendimento"
                     : "Criar conta"}
               </Text>
             )}
@@ -230,8 +231,8 @@ export default function LoginScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => switchMode("restaurant")}>
                   <Text style={styles.switchText}>
-                    É restaurante?{" "}
-                    <Text style={styles.switchTextBold}>Cadastrar espaço</Text>
+                    É empreendimento?{" "}
+                    <Text style={styles.switchTextBold}>Cadastre aqui</Text>
                   </Text>
                 </TouchableOpacity>
               </>
@@ -249,21 +250,21 @@ export default function LoginScreen() {
                   }
                 >
                   <Text style={styles.switchText}>
-                    {isRestaurant ? "Sou cliente" : "Sou restaurante"}
+                    {isRestaurant ? "Sou cliente" : "Sou bar/restaurante"}
                   </Text>
                 </TouchableOpacity>
               </>
             )}
           </View>
-
-          {isLogin && (
-            <View style={styles.hintBox}>
-              <Text style={styles.hintTitle}>🔑 Contas de teste</Text>
-              <Text style={styles.hintText}>Cliente: maria@buzzed.com / 123456</Text>
-              <Text style={styles.hintText}>Restaurante: bar@buzzed.com / 123456</Text>
-            </View>
-          )}
         </View>
+
+        {isLogin && (
+          <View style={styles.hintBox}>
+            <Text style={styles.hintTitle}>Contas de teste</Text>
+            <Text style={styles.hintText}>Cliente: maria@buzzed.com / 123456</Text>
+            <Text style={styles.hintText}>Bar/Restaurante: bar@buzzed.com / 123456</Text>
+          </View>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -283,10 +284,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: SPACING.xxl,
     marginTop: SPACING.xl,
-  },
-  logoEmoji: {
-    fontSize: 64,
-    marginBottom: SPACING.md,
   },
   logoText: {
     fontSize: FONTS.sizes.hero,
