@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SimpleGrid } from "react-native-super-grid";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import DrinkCard from "../components/DrinkCard";
 import api from "../services/api";
@@ -44,14 +45,7 @@ export default function EstablishmentDetailScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={establishment.drinks}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <>
+      <ScrollView contentContainerStyle={styles.listContent}>
             {/* Header with back button */}
             <View style={styles.header}>
               <TouchableOpacity
@@ -68,25 +62,6 @@ export default function EstablishmentDetailScreen({ route, navigation }) {
                 <Ionicons name="wine" size={48} color={COLORS.primary} />
               </View>
               <Text style={styles.name}>{establishment.name}</Text>
-
-              <View style={styles.metaRow}>
-                <Ionicons name="location" size={16} color={COLORS.primary} />
-                <Text style={styles.address}>{establishment.address}</Text>
-              </View>
-
-              {establishment.phone && (
-                <View style={styles.metaRow}>
-                  <Ionicons name="call" size={16} color={COLORS.primary} />
-                  <Text style={styles.phone}>{establishment.phone}</Text>
-                </View>
-              )}
-
-              {establishment.description && (
-                <Text style={styles.description}>
-                  {establishment.description}
-                </Text>
-              )}
-
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>
@@ -94,28 +69,66 @@ export default function EstablishmentDetailScreen({ route, navigation }) {
                   </Text>
                   <Text style={styles.statLabel}>Drinks</Text>
                 </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statValueSmall}>
+                    {new Date(establishment.createdAt).toLocaleDateString("pt-BR", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </Text>
+                  <Text style={styles.statLabel}>Desde</Text>
+                </View>
               </View>
             </View>
 
+            {establishment.description && (
+              <Text style={styles.description}>
+                {establishment.description}
+              </Text>
+            )}
+
+            <View style={styles.contactSection}>
+              <TouchableOpacity style={styles.contactRow}>
+                <Ionicons name="location" size={18} color={COLORS.primary} />
+                <Text style={styles.contactText} selectable>{establishment.address}</Text>
+                <Ionicons name="copy-outline" size={16} color={COLORS.textMuted} />
+              </TouchableOpacity>
+
+              {establishment.phone && (
+                <TouchableOpacity style={styles.contactRow}>
+                  <Ionicons name="call" size={18} color={COLORS.primary} />
+                  <Text style={styles.contactText} selectable>{establishment.phone}</Text>
+                  <Ionicons name="copy-outline" size={16} color={COLORS.textMuted} />
+                </TouchableOpacity>
+              )}
+            </View>
+
             <Text style={styles.sectionTitle}>
-              🍸 Cardápio ({establishment.drinks?.length || 0})
+              Cardápio ({establishment.drinks?.length || 0})
             </Text>
-          </>
-        }
-        renderItem={({ item }) => (
-          <DrinkCard
-            drink={item}
-            onPress={() =>
-              navigation.navigate("DrinkDetail", { drinkId: item.id })
-            }
-          />
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Nenhum drink cadastrado</Text>
-          </View>
-        }
-      />
+
+            {establishment.drinks?.length > 0 ? (
+              <SimpleGrid
+                itemDimension={140}
+                maxItemsPerRow={3}
+                data={establishment.drinks}
+                spacing={SPACING.base}
+                renderItem={({ item }) => (
+                  <DrinkCard
+                    drink={item}
+                    onPress={() =>
+                      navigation.navigate("DrinkDetail", { drinkId: item.id })
+                    }
+                  />
+                )}
+              />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>Nenhum drink cadastrado</Text>
+              </View>
+            )}
+      </ScrollView>
     </View>
   );
 }
@@ -134,9 +147,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: SPACING.base,
     paddingBottom: SPACING.xxxl,
-  },
-  row: {
-    justifyContent: "space-between",
   },
   header: {
     paddingTop: SPACING.md,
@@ -195,21 +205,52 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.md,
     lineHeight: 22,
-    textAlign: "center",
-    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  contactSection: {
+    marginBottom: SPACING.lg,
+    gap: SPACING.sm,
+  },
+  contactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.card,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
+    gap: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  contactText: {
+    color: COLORS.text,
+    fontSize: FONTS.sizes.base,
+    flex: 1,
   },
   statsRow: {
     flexDirection: "row",
     marginTop: SPACING.lg,
-    gap: SPACING.xxl,
+    alignItems: "center",
+    width: "100%",
   },
   statItem: {
+    flex: 1,
     alignItems: "center",
   },
   statValue: {
     fontSize: FONTS.sizes.xxl,
     fontWeight: FONTS.weights.black,
     color: COLORS.primary,
+  },
+  statValueSmall: {
+    fontSize: FONTS.sizes.base,
+    fontWeight: FONTS.weights.bold,
+    color: COLORS.primary,
+    marginBottom: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: COLORS.border,
   },
   statLabel: {
     color: COLORS.textMuted,
