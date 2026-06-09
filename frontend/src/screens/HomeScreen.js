@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
@@ -10,10 +9,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SimpleGrid } from "react-native-super-grid";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import { useAuth } from "../contexts/AuthContext";
 import DrinkCard from "../components/DrinkCard";
 import api from "../services/api";
+
+const ITEM_DIMENSION = 140;
+const GRID_SPACING = SPACING.base;
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
@@ -22,6 +25,7 @@ export default function HomeScreen({ navigation }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [cardWidth, setCardWidth] = useState(ITEM_DIMENSION);
 
   const loadData = useCallback(async () => {
     try {
@@ -82,11 +86,7 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={drinks}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
+      <ScrollView
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -96,8 +96,7 @@ export default function HomeScreen({ navigation }) {
             colors={[COLORS.primary]}
           />
         }
-        ListHeaderComponent={
-          <>
+      >
             {/* Header */}
             <View style={styles.header}>
               <View>
@@ -187,6 +186,7 @@ export default function HomeScreen({ navigation }) {
                       key={drink.id}
                       drink={drink}
                       compact
+                      compactWidth={cardWidth}
                       onPress={() =>
                         navigation.navigate("DrinkDetail", { drinkId: drink.id })
                       }
@@ -203,25 +203,36 @@ export default function HomeScreen({ navigation }) {
               {" "}
               <Text style={styles.countText}>({drinks.length})</Text>
             </Text>
-          </>
-        }
-        renderItem={({ item }) => (
-          <DrinkCard
-            drink={item}
-            onPress={() =>
-              navigation.navigate("DrinkDetail", { drinkId: item.id })
-            }
-          />
-        )}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyEmoji}>🔍</Text>
-            <Text style={styles.emptyText}>
-              Nenhum drink encontrado nesta categoria
-            </Text>
-          </View>
-        }
-      />
+
+            {drinks.length > 0 ? (
+              <SimpleGrid
+                itemDimension={ITEM_DIMENSION}
+                maxItemsPerRow={3}
+                data={drinks}
+                spacing={GRID_SPACING}
+                renderItem={({ item }) => (
+                  <View onLayout={(e) => {
+                    const w = e.nativeEvent.layout.width;
+                    if (w !== cardWidth) setCardWidth(w);
+                  }}>
+                    <DrinkCard
+                      drink={item}
+                      onPress={() =>
+                        navigation.navigate("DrinkDetail", { drinkId: item.id })
+                      }
+                    />
+                  </View>
+                )}
+              />
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyEmoji}>🔍</Text>
+                <Text style={styles.emptyText}>
+                  Nenhum drink encontrado nesta categoria
+                </Text>
+              </View>
+            )}
+      </ScrollView>
     </View>
   );
 }
@@ -240,9 +251,6 @@ const styles = StyleSheet.create({
   listContent: {
     padding: SPACING.base,
     paddingBottom: SPACING.xxxl,
-  },
-  row: {
-    justifyContent: "space-between",
   },
   header: {
     flexDirection: "row",
