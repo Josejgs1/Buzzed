@@ -126,12 +126,7 @@ export default function ProfileScreen({ navigation }) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{myBadges.length}</Text>
-            <Text style={styles.statLabel}>Badges</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>
+            <Text style={styles.statValueSmall}>
               {new Date(profile?.createdAt).toLocaleDateString("pt-BR", {
                 month: "short",
                 year: "numeric",
@@ -279,6 +274,12 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: FONTS.sizes.xl,
     fontWeight: FONTS.weights.black,
+    color: COLORS.primary,
+    marginBottom: 2,
+  },
+  statValueSmall: {
+    fontSize: FONTS.sizes.base,
+    fontWeight: FONTS.weights.bold,
     color: COLORS.primary,
     marginBottom: 2,
   },
