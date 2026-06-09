@@ -175,7 +175,10 @@ export default function HomeScreen({ navigation }) {
             {/* Top rated section (only when no filter) */}
             {!selectedCategory && topRated.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>⭐ Mais bem avaliados</Text>
+                <View style={styles.sectionTitleRow}>
+                  <Ionicons name="star" size={20} color={COLORS.primary} />
+                  <Text style={styles.sectionTitle}>Mais bem avaliados</Text>
+                </View>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -196,13 +199,15 @@ export default function HomeScreen({ navigation }) {
               </View>
             )}
 
-            <Text style={styles.sectionTitle}>
-              {selectedCategory
-                ? `${categories.find((c) => c.id === selectedCategory)?.name || "Filtrado"}`
-                : "🍸 Todos os drinks"}
-              {" "}
-              <Text style={styles.countText}>({drinks.length})</Text>
-            </Text>
+            <View style={styles.sectionTitleRow}>
+              <Text style={styles.sectionTitle}>
+                {selectedCategory
+                  ? `${categories.find((c) => c.id === selectedCategory)?.name || "Filtrado"}`
+                  : "Todos os drinks"}
+                {" "}
+                <Text style={styles.countText}>({drinks.length})</Text>
+              </Text>
+            </View>
 
             {drinks.length > 0 ? (
               <SimpleGrid
@@ -319,11 +324,16 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: SPACING.xl,
   },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
   sectionTitle: {
     fontSize: FONTS.sizes.lg,
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
-    marginBottom: SPACING.md,
   },
   countText: {
     color: COLORS.textMuted,

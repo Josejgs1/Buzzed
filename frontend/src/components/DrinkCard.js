@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import StarRating from "./StarRating";
@@ -24,9 +24,17 @@ export default function DrinkCard({ drink, onPress, compact = false, compactWidt
     >
       {/* Visual placeholder with gradient */}
       <View style={styles.imageContainer}>
-        <View style={styles.gradientBg}>
-          <Text style={styles.drinkEmoji}>{emoji}</Text>
-        </View>
+        {drink.imageUrl ? (
+          <Image
+            source={{ uri: `http://192.168.18.223:3333${drink.imageUrl}` }}
+            style={styles.drinkImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.gradientBg}>
+            <Text style={styles.drinkEmoji}>{emoji}</Text>
+          </View>
+        )}
         {drink.abv > 0 && (
           <View style={styles.abvBadge}>
             <Text style={styles.abvText}>{drink.abv}%</Text>
@@ -110,6 +118,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
+  },
+  drinkImage: {
+    width: "100%",
+    height: "100%",
   },
   drinkEmoji: {
     fontSize: 48,
