@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   cardCompact: {
-    width: CARD_WIDTH * 0.9,
+    width: width * 0.42,
     marginRight: SPACING.md,
   },
   imageContainer: {
