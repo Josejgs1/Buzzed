@@ -8,15 +8,17 @@ datasource db {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  name      String
-  email     String      @unique
-  password  String
-  avatarUrl String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  reviews   Review[]
-  badges    UserBadge[]
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("CUSTOMER")
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  reviews       Review[]
+  badges        UserBadge[]
+  establishment Establishment?
 }
 
 model Establishment {
@@ -26,8 +28,12 @@ model Establishment {
   phone       String?
   description String?
   imageUrl    String?
+  ownerId     Int?     @unique
   createdAt   DateTime @default(now())
+  owner       User?    @relation(fields: [ownerId], references: [id])
   drinks      Drink[]
+
+  @@index([ownerId])
 }
 
 model Category {
@@ -54,6 +60,7 @@ model Drink {
   bitterness      Int               @default(3) // 1-5
   citrus          Int               @default(3) // 1-5
   strength        Int               @default(3) // 1-5
+  isActive        Boolean           @default(true)
   categoryId      Int
   establishmentId Int
   createdAt       DateTime          @default(now())
@@ -64,6 +71,7 @@ model Drink {
 
   @@index([categoryId])
   @@index([establishmentId])
+  @@index([isActive])
 }
 
 model DrinkIngredient {

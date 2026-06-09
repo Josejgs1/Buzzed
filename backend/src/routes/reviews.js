@@ -19,7 +19,9 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 
     // Check if drink exists
-    const drink = await prisma.drink.findUnique({ where: { id: drinkId } });
+    const drink = await prisma.drink.findFirst({
+      where: { id: drinkId, isActive: true },
+    });
     if (!drink) {
       return res.status(404).json({ error: "Drink não encontrado" });
     }

@@ -15,20 +15,33 @@ import { COLORS, FONTS, SPACING, RADIUS } from "../theme";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginScreen() {
-  const { signIn, signUp } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
+  const { signIn, signUp, signUpRestaurant } = useAuth();
+  const [mode, setMode] = useState("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [establishmentName, setEstablishmentName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const isLogin = mode === "login";
+  const isRestaurant = mode === "restaurant";
 
   async function handleSubmit() {
     if (!email || !password) {
       Alert.alert("Erro", "Preencha email e senha");
       return;
     }
+
     if (!isLogin && !name) {
       Alert.alert("Erro", "Preencha seu nome");
+      return;
+    }
+
+    if (isRestaurant && (!establishmentName || !address)) {
+      Alert.alert("Erro", "Preencha nome e endereço do restaurante");
       return;
     }
 
@@ -36,16 +49,31 @@ export default function LoginScreen() {
     try {
       if (isLogin) {
         await signIn(email, password);
+      } else if (isRestaurant) {
+        await signUpRestaurant({
+          ownerName: name,
+          email,
+          password,
+          establishmentName,
+          address,
+          phone,
+          description,
+        });
       } else {
         await signUp(name, email, password);
       }
     } catch (error) {
       const msg =
-        error.response?.data?.error || "Erro de conexão. Verifique se o servidor está rodando.";
+        error.response?.data?.error ||
+        "Erro de conexão. Verifique se o servidor está rodando.";
       Alert.alert("Erro", msg);
     } finally {
       setLoading(false);
     }
+  }
+
+  function switchMode(nextMode) {
+    setMode(nextMode);
   }
 
   return (
@@ -57,30 +85,36 @@ export default function LoginScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Logo area */}
         <View style={styles.logoArea}>
           <Text style={styles.logoEmoji}>🍸</Text>
           <Text style={styles.logoText}>Buzzed</Text>
           <Text style={styles.tagline}>Drink Explorer & Feedback</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <Text style={styles.formTitle}>
-            {isLogin ? "Bem-vindo de volta!" : "Crie sua conta"}
+            {isLogin
+              ? "Entrar"
+              : isRestaurant
+                ? "Cadastrar restaurante"
+                : "Criar conta"}
           </Text>
           <Text style={styles.formSubtitle}>
             {isLogin
-              ? "Faça login para explorar drinks"
-              : "Comece sua jornada de exploração"}
+              ? "Acesse sua conta de cliente ou restaurante"
+              : isRestaurant
+                ? "Publique seu cardápio e acompanhe avaliações"
+                : "Explore drinks e registre suas experiências"}
           </Text>
 
           {!isLogin && (
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Nome</Text>
+              <Text style={styles.inputLabel}>
+                {isRestaurant ? "Responsável" : "Nome"}
+              </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Seu nome"
+                placeholder={isRestaurant ? "Nome do responsável" : "Seu nome"}
                 placeholderTextColor={COLORS.textMuted}
                 value={name}
                 onChangeText={setName}
@@ -114,6 +148,58 @@ export default function LoginScreen() {
             />
           </View>
 
+          {isRestaurant && (
+            <>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Restaurante</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome do restaurante"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={establishmentName}
+                  onChangeText={setEstablishmentName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Endereço</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Rua, número, cidade"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={address}
+                  onChangeText={setAddress}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Telefone</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="(11) 99999-9999"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Descrição</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Resumo do espaço, proposta e especialidades"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+            </>
+          )}
+
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit}
@@ -124,30 +210,57 @@ export default function LoginScreen() {
               <ActivityIndicator color={COLORS.background} />
             ) : (
               <Text style={styles.buttonText}>
-                {isLogin ? "Entrar" : "Criar conta"}
+                {isLogin
+                  ? "Entrar"
+                  : isRestaurant
+                    ? "Cadastrar restaurante"
+                    : "Criar conta"}
               </Text>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => setIsLogin(!isLogin)}
-          >
-            <Text style={styles.switchText}>
-              {isLogin
-                ? "Não tem conta? "
-                : "Já tem conta? "}
-              <Text style={styles.switchTextBold}>
-                {isLogin ? "Cadastre-se" : "Faça login"}
-              </Text>
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.modeActions}>
+            {isLogin ? (
+              <>
+                <TouchableOpacity onPress={() => switchMode("customer")}>
+                  <Text style={styles.switchText}>
+                    Não tem conta?{" "}
+                    <Text style={styles.switchTextBold}>Cadastre-se</Text>
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => switchMode("restaurant")}>
+                  <Text style={styles.switchText}>
+                    É restaurante?{" "}
+                    <Text style={styles.switchTextBold}>Cadastrar espaço</Text>
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity onPress={() => switchMode("login")}>
+                  <Text style={styles.switchText}>
+                    Já tem conta?{" "}
+                    <Text style={styles.switchTextBold}>Entrar</Text>
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    switchMode(isRestaurant ? "customer" : "restaurant")
+                  }
+                >
+                  <Text style={styles.switchText}>
+                    {isRestaurant ? "Sou cliente" : "Sou restaurante"}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
 
-          {/* Quick login hint */}
           {isLogin && (
             <View style={styles.hintBox}>
-              <Text style={styles.hintTitle}>🔑 Conta de teste:</Text>
-              <Text style={styles.hintText}>maria@buzzed.com / 123456</Text>
+              <Text style={styles.hintTitle}>🔑 Contas de teste</Text>
+              <Text style={styles.hintText}>Cliente: maria@buzzed.com / 123456</Text>
+              <Text style={styles.hintText}>Restaurante: bar@buzzed.com / 123456</Text>
             </View>
           )}
         </View>
@@ -168,7 +281,8 @@ const styles = StyleSheet.create({
   },
   logoArea: {
     alignItems: "center",
-    marginBottom: SPACING.xxxl,
+    marginBottom: SPACING.xxl,
+    marginTop: SPACING.xl,
   },
   logoEmoji: {
     fontSize: 64,
@@ -224,6 +338,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
   },
+  textArea: {
+    minHeight: 88,
+  },
   button: {
     backgroundColor: COLORS.primary,
     borderRadius: RADIUS.md,
@@ -239,8 +356,9 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.lg,
     fontWeight: FONTS.weights.bold,
   },
-  switchButton: {
+  modeActions: {
     alignItems: "center",
+    gap: SPACING.sm,
     marginTop: SPACING.lg,
   },
   switchText: {
@@ -268,5 +386,6 @@ const styles = StyleSheet.create({
   hintText: {
     color: COLORS.textSecondary,
     fontSize: FONTS.sizes.sm,
+    marginTop: 2,
   },
 });

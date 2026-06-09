@@ -9,8 +9,9 @@ O grande diferencial do Buzzed é a sua abordagem focada no **perfil sensorial**
 ### Backend
 - **Node.js** com **Express** para a criação da API REST.
 - **Prisma ORM** para modelagem, migrações e manipulação do banco de dados.
-- **SQLite** como banco de dados local para facilitar o setup inicial do MVP.
+- **PostgreSQL** como banco de dados da API.
 - **JWT (JSON Web Tokens)** e **Bcrypt** para autenticação e segurança dos usuários.
+- **Controle de acesso por papel** para separar clientes e donos de restaurante.
 
 ### Frontend (Mobile)
 - **React Native** com o framework **Expo** (SDK 54).
@@ -34,6 +35,9 @@ cd backend
 
 # Instale as dependências do Node
 npm install
+
+# Configure a conexão com PostgreSQL
+echo 'DATABASE_URL="postgresql://usuario:senha@host:5432/banco"' > .env
 
 # Crie o banco de dados e popule-o com dados de teste (bares, drinks e usuários)
 npx prisma migrate dev
@@ -69,6 +73,45 @@ npx expo start -c
 4. Abra o **Expo Go** no seu celular:
    - **Android:** Toque em "Scan QR Code" na tela inicial do app e aponte para o terminal.
    - **iOS:** Abra a Câmera nativa do iPhone, escaneie o QR Code e toque para abrir no Expo Go.
+
+## 👥 Perfis Implementados
+
+O aplicativo separa dois tipos de conta:
+
+- **Cliente:** explora drinks, consulta estabelecimentos, avalia produtos, acompanha histórico e desbloqueia badges.
+- **Restaurante:** acessa um painel próprio para editar dados do estabelecimento, cadastrar produtos, editar/remover itens do cardápio e acompanhar avaliações recebidas.
+
+Depois do login, o app redireciona automaticamente conforme o `role` do usuário:
+
+- `CUSTOMER` abre as abas **Explorar**, **Locais**, **Histórico** e **Perfil**.
+- `RESTAURANT_OWNER` abre as abas **Painel**, **Produtos** e **Avaliações**.
+
+## 🏪 Espaço do Restaurante
+
+### Funcionalidades
+
+- Cadastro de restaurante com responsável, email, senha, nome do estabelecimento, endereço, telefone e descrição.
+- Login usando o mesmo formulário do app.
+- Painel com dados do estabelecimento, quantidade de produtos ativos, quantidade de avaliações e média geral.
+- Edição dos dados básicos do restaurante.
+- Cadastro, edição e remoção de produtos/drinks do cardápio.
+- Cadastro de ingredientes por texto; o backend cria ingredientes novos automaticamente quando necessário.
+- Produtos removidos usam exclusão lógica (`isActive = false`), mantendo avaliações históricas.
+- Clientes só veem produtos ativos nas telas públicas.
+- Donos de restaurante só conseguem acessar e alterar dados do próprio estabelecimento.
+
+### Rotas principais
+
+- `POST /restaurant/register` cadastra usuário dono + estabelecimento.
+- `GET /restaurant/dashboard` retorna estabelecimento e métricas.
+- `GET /restaurant/establishment` retorna dados do estabelecimento logado.
+- `PUT /restaurant/establishment` atualiza dados do estabelecimento.
+- `GET /restaurant/drinks` lista produtos ativos do restaurante logado.
+- `GET /restaurant/drinks/:id` retorna um produto próprio.
+- `POST /restaurant/drinks` cadastra produto.
+- `PUT /restaurant/drinks/:id` edita produto próprio.
+- `DELETE /restaurant/drinks/:id` remove produto do cardápio via `isActive = false`.
+- `GET /restaurant/reviews` lista avaliações recebidas nos produtos do restaurante.
 
 ## 🌐 Deploy Atual
 
@@ -113,10 +156,18 @@ Start Command: node src/server.js
 
 Depois do primeiro deploy com banco vazio, rode `npm run seed` uma vez no Shell do Render para criar os usuários de teste.
 
-### 🔑 Usuários para Teste
+## 🔑 Usuários para Teste
 
 Ao rodar o `npm run seed`, o banco já é populado com três contas prontas para uso. Você pode fazer login no app usando:
+
+### Clientes
 
 - **Login:** `maria@buzzed.com` | **Senha:** `123456`
 - **Login:** `joao@buzzed.com` | **Senha:** `123456`
 - **Login:** `ana@buzzed.com` | **Senha:** `123456`
+
+### Restaurantes
+
+- **Login:** `bar@buzzed.com` | **Senha:** `123456`
+- **Login:** `rooftop@buzzed.com` | **Senha:** `123456`
+- **Login:** `boteco@buzzed.com` | **Senha:** `123456`
