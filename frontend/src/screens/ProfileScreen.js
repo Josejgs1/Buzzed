@@ -64,30 +64,30 @@ export default function ProfileScreen({ navigation }) {
 
   const ownedBadgeIds = new Set(myBadges.map((b) => b.id));
 
-  const badgeEmojis = {
-    "Primeiro Gole": "🥂",
-    "Explorador Iniciante": "🗺️",
-    Mixologista: "🧪",
-    "Mestre dos Clássicos": "🎩",
-    "Viajante Tropical": "🌴",
-    "Amante do Gin": "🫒",
-    "Bar Hopper": "🏃",
-    "Crítico Exigente": "✍️",
+  const badgeIcons = {
+    "Primeiro Gole": "pint",
+    "Explorador Iniciante": "compass",
+    Mixologista: "flask",
+    "Mestre dos Clássicos": "medal",
+    "Viajante Tropical": "leaf",
+    "Amante do Gin": "wine",
+    "Bar Hopper": "footsteps",
+    "Crítico Exigente": "pencil",
   };
 
   // Compute explorer level
   const reviewCount = profile?._count?.reviews || 0;
   let level = "Iniciante";
-  let levelEmoji = "🌱";
+  let levelIcon = "leaf";
   if (reviewCount >= 15) {
     level = "Mixologista";
-    levelEmoji = "🧪";
+    levelIcon = "flask";
   } else if (reviewCount >= 5) {
     level = "Explorador";
-    levelEmoji = "🗺️";
+    levelIcon = "compass";
   } else if (reviewCount >= 1) {
     level = "Curioso";
-    levelEmoji = "👀";
+    levelIcon = "eye";
   }
 
   return (
@@ -115,7 +115,7 @@ export default function ProfileScreen({ navigation }) {
         <Text style={styles.userEmail}>{profile?.email}</Text>
 
         <View style={styles.levelBadge}>
-          <Text style={styles.levelEmoji}>{levelEmoji}</Text>
+          <Ionicons name={levelIcon} size={18} color={COLORS.primary} />
           <Text style={styles.levelText}>{level}</Text>
         </View>
 
@@ -139,9 +139,12 @@ export default function ProfileScreen({ navigation }) {
 
       {/* Badges section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          🏆 Conquistas ({myBadges.length}/{allBadges.length})
-        </Text>
+        <View style={styles.sectionTitleRow}>
+          <Ionicons name="trophy" size={20} color={COLORS.primary} />
+          <Text style={styles.sectionTitle}>
+            Conquistas ({myBadges.length}/{allBadges.length})
+          </Text>
+        </View>
         <View style={styles.badgesGrid}>
           {allBadges.map((badge) => {
             const owned = ownedBadgeIds.has(badge.id);
@@ -150,9 +153,12 @@ export default function ProfileScreen({ navigation }) {
                 key={badge.id}
                 style={[styles.badgeCard, !owned && styles.badgeCardLocked]}
               >
-                <Text style={[styles.badgeEmoji, !owned && styles.badgeEmojiLocked]}>
-                  {badgeEmojis[badge.name] || "🏅"}
-                </Text>
+                <Ionicons
+                  name={badgeIcons[badge.name] || "ribbon"}
+                  size={28}
+                  color={owned ? COLORS.success : COLORS.textMuted}
+                  style={styles.badgeIcon}
+                />
                 <Text
                   style={[styles.badgeName, !owned && styles.badgeNameLocked]}
                   numberOfLines={1}
@@ -254,9 +260,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary + "44",
     marginBottom: SPACING.lg,
   },
-  levelEmoji: {
-    fontSize: 18,
-  },
   levelText: {
     color: COLORS.primary,
     fontSize: FONTS.sizes.sm,
@@ -301,6 +304,11 @@ const styles = StyleSheet.create({
     fontSize: FONTS.sizes.lg,
     fontWeight: FONTS.weights.bold,
     color: COLORS.text,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
     marginBottom: SPACING.md,
   },
   badgesGrid: {
@@ -320,12 +328,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     opacity: 0.6,
   },
-  badgeEmoji: {
-    fontSize: 28,
+  badgeIcon: {
     marginBottom: SPACING.xs,
-  },
-  badgeEmojiLocked: {
-    opacity: 0.4,
   },
   badgeName: {
     color: COLORS.text,
